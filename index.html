@@ -6,61 +6,95 @@
 <title>JARVIS — AI Transformation Roadmap | MVL</title>
 <style>
   :root {
-    --orange: #E8541E;
-    --dark: #1A1A1A;
-    --gray: #6B6B6B;
-    --light: #F7F7F7;
-    --border: #E5E5E5;
-    --orange-light: #FDF1EC;
+    --orange: #FF6B35;
+    --orange2: #FF8C5A;
+    --dark: #2C2C3E;
+    --gray: #7A7A9A;
+    --light: #F5F4FF;
+    --border: #E8E6F0;
+    --orange-light: #FFF3EE;
+    --bg: #FAFAFE;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: var(--dark); line-height: 1.6; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--dark); line-height: 1.6; }
 
   /* ── NAV ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: var(--dark); border-bottom: 3px solid var(--orange);
     display: flex; align-items: center; gap: 0; padding: 0 32px; height: 52px;
+    box-shadow: 0 2px 12px rgba(44,44,62,.18);
   }
   .nav-brand { color: var(--orange); font-weight: 700; font-size: 15px; letter-spacing: 1px; margin-right: 32px; white-space: nowrap; }
   .nav-links { display: flex; gap: 4px; overflow-x: auto; }
   .nav-links a {
-    color: #ccc; text-decoration: none; font-size: 13px; padding: 6px 14px;
+    color: #b0aed0; text-decoration: none; font-size: 13px; padding: 6px 14px;
     border-radius: 4px; white-space: nowrap; transition: all .2s;
   }
-  .nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(232,84,30,.25); }
+  .nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(255,107,53,.3); }
 
   /* ── LAYOUT ── */
   main { max-width: 960px; margin: 0 auto; padding: 80px 24px 80px; }
 
   /* ── HERO ── */
   .hero {
-    background: var(--dark); border-radius: 12px; padding: 48px 40px;
+    background: var(--dark); border-radius: 16px; padding: 48px 40px;
     margin-bottom: 48px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(44,44,62,.2);
   }
   .hero::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: var(--orange);
+    background: linear-gradient(90deg, var(--orange), var(--orange2));
+  }
+  .hero::after {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,107,53,.12), transparent 70%);
   }
   .hero-tag { color: var(--orange); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
   .hero h1 { color: #fff; font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
   .hero h1 span { color: var(--orange); }
-  .hero-sub { color: #888; font-size: 14px; margin-bottom: 24px; }
+  .hero-sub { color: #9896b8; font-size: 14px; margin-bottom: 24px; }
   .hero-meta { display: flex; gap: 24px; flex-wrap: wrap; }
-  .hero-meta-item { color: #aaa; font-size: 13px; }
-  .hero-meta-item strong { color: #fff; }
+  .hero-meta-item { color: #9896b8; font-size: 13px; }
+  .hero-meta-item strong { color: #e8e6ff; }
 
   /* ── STATUS BADGE ── */
   .badge {
     display: inline-block; padding: 2px 10px; border-radius: 20px;
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
   }
-  .badge-todo { background: #2a2a2a; color: #aaa; border: 1px solid #444; }
-  .badge-doing { background: #1a3a5c; color: #5bc0f8; border: 1px solid #2a5c8a; }
-  .badge-done { background: #1a3a1a; color: #5bf85b; border: 1px solid #2a5c2a; }
-  .badge-high { background: #3a1a1a; color: #f85b5b; border: 1px solid #5c2a2a; }
-  .badge-mid { background: #3a2a1a; color: #f8c05b; border: 1px solid #5c3a1a; }
-  .badge-low { background: #1a2a1a; color: #7af87a; border: 1px solid #2a4a2a; }
+  .badge-todo { background: #EBEBF5; color: #7A7A9A; border: 1px solid #D0CEEA; }
+  .badge-doing { background: #E8F4FE; color: #2A7AC0; border: 1px solid #B8D8F5; }
+  .badge-done { background: #E8FAF0; color: #1E9A58; border: 1px solid #B0E8CA; }
+
+  /* ── STATUS SELECT ── */
+  .status-select {
+    appearance: none; -webkit-appearance: none;
+    border: none; outline: none; cursor: pointer;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+    padding: 4px 22px 4px 10px; border-radius: 20px;
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    background-size: 9px;
+    transition: all .15s;
+  }
+  .status-select.s-todo {
+    background-color: #EBEBF5; color: #7A7A9A; border: 1px solid #D0CEEA;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237A7A9A'/%3E%3C/svg%3E");
+  }
+  .status-select.s-doing {
+    background-color: #E8F4FE; color: #2A7AC0; border: 1px solid #B8D8F5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%232A7AC0'/%3E%3C/svg%3E");
+  }
+  .status-select.s-done {
+    background-color: #E8FAF0; color: #1E9A58; border: 1px solid #B0E8CA;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231E9A58'/%3E%3C/svg%3E");
+  }
+  .status-select option { background: #fff; color: var(--dark); font-size: 12px; }
+  .badge-high { background: #FEECEC; color: #D93025; border: 1px solid #F5C0BE; }
+  .badge-mid  { background: #FEF6E8; color: #C07000; border: 1px solid #F5DFA8; }
+  .badge-low  { background: #E8FAF0; color: #1E9A58; border: 1px solid #B0E8CA; }
 
   /* ── SECTIONS ── */
   section { margin-bottom: 56px; scroll-margin-top: 68px; }
@@ -80,13 +114,13 @@
   }
 
   /* ── TABLES ── */
-  .tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; }
+  .tbl-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 16px; box-shadow: 0 2px 8px rgba(44,44,62,.06); }
   table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   th {
-    background: var(--dark); color: #fff; text-align: left;
+    background: var(--dark); color: #e8e6ff; text-align: left;
     padding: 10px 14px; font-weight: 600; font-size: 12px; letter-spacing: .4px;
   }
-  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; background: #fff; }
   tr:last-child td { border-bottom: none; }
   tr:nth-child(even) td { background: var(--light); }
   .col-label { font-weight: 600; color: var(--dark); white-space: nowrap; width: 180px; }
@@ -99,7 +133,7 @@
   }
   .dept-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
   .dept-card-header {
-    background: var(--dark); color: #fff; padding: 12px 16px;
+    background: var(--dark); color: #e8e6ff; padding: 12px 16px;
     font-weight: 700; font-size: 13px; letter-spacing: .5px;
     border-left: 4px solid var(--orange);
   }
@@ -113,57 +147,59 @@
 
   /* ── PAIN POINT DETAIL TABLE ── */
   .pain-tbl th:first-child { width: 180px; }
-  .pain-point { background: #fff3f0 !important; }
-  .ai-opp { background: #f0fff0 !important; }
-  .pain-tbl .pp-label { font-weight: 600; color: #c0392b; font-size: 12px; }
-  .pain-tbl .ai-label { font-weight: 600; color: #27ae60; font-size: 12px; }
+  .pain-point { background: #FFF5F3 !important; }
+  .ai-opp { background: #F0FBF5 !important; }
+  .pain-tbl .pp-label { font-weight: 600; color: #D93025; font-size: 12px; }
+  .pain-tbl .ai-label { font-weight: 600; color: #1E9A58; font-size: 12px; }
 
   /* ── TIMELINE ── */
   .timeline-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
   .week-col { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
   .week-header {
-    background: var(--dark); color: #fff; padding: 10px 14px;
+    background: var(--dark); color: #e8e6ff; padding: 10px 14px;
     font-weight: 700; font-size: 12px; text-align: center; letter-spacing: .5px;
   }
-  .week-items { padding: 10px 12px; }
+  .week-items { padding: 10px 12px; background: #fff; }
   .week-item {
-    font-size: 12.5px; color: var(--dark); padding: 6px 8px;
-    background: var(--light); border-radius: 5px; margin-bottom: 6px;
+    font-size: 12.5px; color: var(--dark); padding: 7px 10px;
+    background: var(--light); border-radius: 6px; margin-bottom: 6px;
     border-left: 3px solid var(--orange);
+    box-shadow: 0 1px 4px rgba(44,44,62,.05);
   }
 
   /* ── PRINCIPLES ── */
   .principles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
   .principle {
-    background: var(--light); border-radius: 8px; padding: 16px;
+    background: #fff; border-radius: 10px; padding: 16px;
     border-top: 3px solid var(--orange);
+    box-shadow: 0 2px 8px rgba(44,44,62,.07);
   }
   .principle-num { font-size: 11px; font-weight: 700; color: var(--orange); margin-bottom: 6px; letter-spacing: 1px; }
   .principle-text { font-size: 13px; color: var(--dark); line-height: 1.5; }
 
   /* ── HIRING CARDS ── */
   .hiring-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .hiring-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .hiring-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(44,44,62,.07); }
   .hiring-card-header {
-    background: var(--orange); color: #fff; padding: 14px 18px;
+    background: linear-gradient(135deg, var(--orange), var(--orange2)); color: #fff; padding: 14px 18px;
     font-weight: 700; font-size: 14px; letter-spacing: 1px;
   }
-  .hiring-row { padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .hiring-row { padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 13px; background: #fff; }
   .hiring-row:last-child { border-bottom: none; }
   .hiring-row-label { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
   .hiring-row-val { color: var(--dark); }
 
   /* ── RISK TABLE ── */
-  .risk-high td:first-child { border-left: 3px solid #e74c3c; }
-  .risk-mid td:first-child { border-left: 3px solid #f39c12; }
-  .risk-low td:first-child { border-left: 3px solid #27ae60; }
+  .risk-high td:first-child { border-left: 3px solid #D93025; }
+  .risk-mid td:first-child { border-left: 3px solid #E08A00; }
+  .risk-low td:first-child { border-left: 3px solid #1E9A58; }
 
   /* ── DIVIDER ── */
   hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
   /* ── FOOTER ── */
   footer {
-    background: var(--dark); color: #666; text-align: center;
+    background: var(--dark); color: #8886a8; text-align: center;
     padding: 20px; font-size: 12px; margin-top: 60px;
   }
   footer span { color: var(--orange); }
@@ -386,28 +422,28 @@
               <td>Kick-off meeting: trình bày deck này cho CEO & dept heads</td>
               <td>—</td>
               <td>Align mục tiêu, định hướng AI roadmap</td>
-              <td><span class="badge badge-todo">To Do</span></td>
+              <td><select class="status-select s-todo" onchange="updateStatus(this)"><option value="todo" selected>To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select></td>
             </tr>
             <tr>
               <td style="font-weight:700;color:var(--orange)">2</td>
               <td>Chọn pilot department + problem statement</td>
               <td>—</td>
               <td>Xác định rõ 1 problem cụ thể để giải quyết trong tháng 1</td>
-              <td><span class="badge badge-todo">To Do</span></td>
+              <td><select class="status-select s-todo" onchange="updateStatus(this)"><option value="todo" selected>To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select></td>
             </tr>
             <tr>
               <td style="font-weight:700;color:var(--orange)">3</td>
               <td>Setup Claude for Teams account, invite core team</td>
               <td>—</td>
               <td>Môi trường AI sẵn sàng, data privacy đảm bảo</td>
-              <td><span class="badge badge-todo">To Do</span></td>
+              <td><select class="status-select s-todo" onchange="updateStatus(this)"><option value="todo" selected>To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select></td>
             </tr>
             <tr>
               <td style="font-weight:700;color:var(--orange)">4</td>
               <td>Form JARVIS team</td>
               <td>—</td>
               <td>Thành lập team AI nội bộ với tên JARVIS</td>
-              <td><span class="badge badge-todo">To Do</span></td>
+              <td><select class="status-select s-todo" onchange="updateStatus(this)"><option value="todo" selected>To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select></td>
             </tr>
           </tbody>
         </table>
@@ -616,6 +652,20 @@
     navLinks.forEach(a => {
       a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
     });
+  });
+
+  // Status select box
+  function updateStatus(el) {
+    el.className = 'status-select';
+    const map = { todo: 's-todo', doing: 's-doing', done: 's-done' };
+    el.classList.add(map[el.value]);
+  }
+
+  // Restore saved statuses on load
+  document.querySelectorAll('.status-select').forEach((el, i) => {
+    const saved = localStorage.getItem('status_' + i);
+    if (saved) { el.value = saved; updateStatus(el); }
+    el.addEventListener('change', () => localStorage.setItem('status_' + i, el.value));
   });
 </script>
 </body>
