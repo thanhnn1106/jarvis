@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS — AI Transformation Roadmap | MVL</title>
+<style>
+  :root {
+    --orange: #E8541E;
+    --dark: #1A1A1A;
+    --gray: #6B6B6B;
+    --light: #F7F7F7;
+    --border: #E5E5E5;
+    --orange-light: #FDF1EC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: var(--dark); line-height: 1.6; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--dark); border-bottom: 3px solid var(--orange);
+    display: flex; align-items: center; gap: 0; padding: 0 32px; height: 52px;
+  }
+  .nav-brand { color: var(--orange); font-weight: 700; font-size: 15px; letter-spacing: 1px; margin-right: 32px; white-space: nowrap; }
+  .nav-links { display: flex; gap: 4px; overflow-x: auto; }
+  .nav-links a {
+    color: #ccc; text-decoration: none; font-size: 13px; padding: 6px 14px;
+    border-radius: 4px; white-space: nowrap; transition: all .2s;
+  }
+  .nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(232,84,30,.25); }
+
+  /* ── LAYOUT ── */
+  main { max-width: 960px; margin: 0 auto; padding: 80px 24px 80px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--dark); border-radius: 12px; padding: 48px 40px;
+    margin-bottom: 48px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--orange);
+  }
+  .hero-tag { color: var(--orange); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .hero h1 { color: #fff; font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+  .hero h1 span { color: var(--orange); }
+  .hero-sub { color: #888; font-size: 14px; margin-bottom: 24px; }
+  .hero-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .hero-meta-item { color: #aaa; font-size: 13px; }
+  .hero-meta-item strong { color: #fff; }
+
+  /* ── STATUS BADGE ── */
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .badge-todo { background: #2a2a2a; color: #aaa; border: 1px solid #444; }
+  .badge-doing { background: #1a3a5c; color: #5bc0f8; border: 1px solid #2a5c8a; }
+  .badge-done { background: #1a3a1a; color: #5bf85b; border: 1px solid #2a5c2a; }
+  .badge-high { background: #3a1a1a; color: #f85b5b; border: 1px solid #5c2a2a; }
+  .badge-mid { background: #3a2a1a; color: #f8c05b; border: 1px solid #5c3a1a; }
+  .badge-low { background: #1a2a1a; color: #7af87a; border: 1px solid #2a4a2a; }
+
+  /* ── SECTIONS ── */
+  section { margin-bottom: 56px; scroll-margin-top: 68px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .section-num {
+    background: var(--orange); color: #fff; font-weight: 800; font-size: 13px;
+    width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .section-title { font-size: 20px; font-weight: 700; }
+  .section-desc { color: var(--gray); font-size: 14px; margin-top: 2px; }
+
+  .sub-section { margin-bottom: 28px; }
+  .sub-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--orange); border-left: 3px solid var(--orange); padding-left: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* ── TABLES ── */
+  .tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--dark); color: #fff; text-align: left;
+    padding: 10px 14px; font-weight: 600; font-size: 12px; letter-spacing: .4px;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--light); }
+  .col-label { font-weight: 600; color: var(--dark); white-space: nowrap; width: 180px; }
+
+  /* ── PAIN POINT CARDS ── */
+  .dept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .dept-card {
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .dept-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+  .dept-card-header {
+    background: var(--dark); color: #fff; padding: 12px 16px;
+    font-weight: 700; font-size: 13px; letter-spacing: .5px;
+    border-left: 4px solid var(--orange);
+  }
+  .dept-card-meta { padding: 10px 16px; background: var(--orange-light); border-bottom: 1px solid var(--border); }
+  .dept-card-meta-row { font-size: 12px; color: var(--gray); margin-bottom: 3px; }
+  .dept-card-meta-row strong { color: var(--dark); }
+  .use-case { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .use-case:last-child { border-bottom: none; }
+  .use-case-title { font-weight: 600; font-size: 13px; color: var(--dark); margin-bottom: 4px; }
+  .use-case-desc { font-size: 12.5px; color: var(--gray); line-height: 1.5; }
+
+  /* ── PAIN POINT DETAIL TABLE ── */
+  .pain-tbl th:first-child { width: 180px; }
+  .pain-point { background: #fff3f0 !important; }
+  .ai-opp { background: #f0fff0 !important; }
+  .pain-tbl .pp-label { font-weight: 600; color: #c0392b; font-size: 12px; }
+  .pain-tbl .ai-label { font-weight: 600; color: #27ae60; font-size: 12px; }
+
+  /* ── TIMELINE ── */
+  .timeline-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+  .week-col { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .week-header {
+    background: var(--dark); color: #fff; padding: 10px 14px;
+    font-weight: 700; font-size: 12px; text-align: center; letter-spacing: .5px;
+  }
+  .week-items { padding: 10px 12px; }
+  .week-item {
+    font-size: 12.5px; color: var(--dark); padding: 6px 8px;
+    background: var(--light); border-radius: 5px; margin-bottom: 6px;
+    border-left: 3px solid var(--orange);
+  }
+
+  /* ── PRINCIPLES ── */
+  .principles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .principle {
+    background: var(--light); border-radius: 8px; padding: 16px;
+    border-top: 3px solid var(--orange);
+  }
+  .principle-num { font-size: 11px; font-weight: 700; color: var(--orange); margin-bottom: 6px; letter-spacing: 1px; }
+  .principle-text { font-size: 13px; color: var(--dark); line-height: 1.5; }
+
+  /* ── HIRING CARDS ── */
+  .hiring-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .hiring-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .hiring-card-header {
+    background: var(--orange); color: #fff; padding: 14px 18px;
+    font-weight: 700; font-size: 14px; letter-spacing: 1px;
+  }
+  .hiring-row { padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .hiring-row:last-child { border-bottom: none; }
+  .hiring-row-label { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+  .hiring-row-val { color: var(--dark); }
+
+  /* ── RISK TABLE ── */
+  .risk-high td:first-child { border-left: 3px solid #e74c3c; }
+  .risk-mid td:first-child { border-left: 3px solid #f39c12; }
+  .risk-low td:first-child { border-left: 3px solid #27ae60; }
+
+  /* ── DIVIDER ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); color: #666; text-align: center;
+    padding: 20px; font-size: 12px; margin-top: 60px;
+  }
+  footer span { color: var(--orange); }
+
+  @media (max-width: 640px) {
+    .timeline-grid { grid-template-columns: 1fr 1fr; }
+    .hiring-grid { grid-template-columns: 1fr; }
+    .dept-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">⚡ JARVIS</div>
+  <div class="nav-links">
+    <a href="#overview">01 Tổng quan</a>
+    <a href="#pain">02 Pain Points</a>
+    <a href="#action">03 Kế hoạch</a>
+    <a href="#resource">04 Resource</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">Modern Village Lifestyle — Internal</div>
+    <h1>AI Transformation<br><span>Roadmap</span></h1>
+    <div class="hero-sub">Kế hoạch triển khai AI nội bộ — Bảo mật, chỉ dùng nội bộ</div>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>Trình bày:</strong> Thanh Nguyen — Head of Engineering</div>
+      <div class="hero-meta-item"><strong>Tháng:</strong> 4 / 2026</div>
+      <div class="hero-meta-item"><strong>Phase hiện tại:</strong> Pilot — Chọn 1 department</div>
+      <div class="hero-meta-item"><strong>Team:</strong> JARVIS</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <section id="overview">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div>
+        <div class="section-title">Tổng quan 6 bộ phận & Kiến trúc hệ thống</div>
+        <div class="section-desc">Sơ đồ data flow, danh sách bộ phận & tools hiện tại</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Bộ phận</th><th>Vai trò & Nhiệm vụ</th><th>Tools hiện tại</th></tr></thead>
+        <tbody>
+          <tr><td class="col-label">Commercial</td><td>Sales · CS · Marketing · Strategy</td><td>HubSpot CRM · Looker Studio · Google/FB Ads · Lighthouse · Odoo PMS</td></tr>
+          <tr><td class="col-label">Finance</td><td>Kế toán · Purchasing</td><td>FAST Accounting · Odoo 14 · Excel</td></tr>
+          <tr><td class="col-label">Nhân sự</td><td>Tuyển dụng · L&D · Admin</td><td>HaraWorks · Google Sheets · Email · Zalo</td></tr>
+          <tr><td class="col-label">Vận hành</td><td>GM · FO · Butler · Receptionist · F&amp;B</td><td>Odoo 14 PMS · Zalo · Telegram · Excel</td></tr>
+          <tr><td class="col-label">Dự án & Bảo trì</td><td>Project Manager · Supervisor · Facilities</td><td>Odoo (tasks) · Excel · Zalo · Email</td></tr>
+          <tr><td class="col-label">TECH</td><td>Product · Lead Engineer · Backend · Frontend · DevOps · QA</td><td>Odoo 14 · PostgreSQL · Golang · Python · Node.js · React.js · Flutter · Confluence · Jira · Slack</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 2: PAIN POINTS -->
+  <section id="pain">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div>
+        <div class="section-title">Pain Points từng bộ phận</div>
+        <div class="section-desc">Phân tích vấn đề & cơ hội AI theo từng phòng ban — click để xem chi tiết</div>
+      </div>
+    </div>
+
+    <!-- OPS -->
+    <div class="sub-section">
+      <div class="sub-title">1 — Vận hành (OPS)</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px;">GM · FO · Butler · Receptionist · F&amp;B &nbsp;|&nbsp; Odoo 14 PMS · Zalo · Telegram · Excel · WhatsApp</div>
+      <div class="tbl-wrap">
+        <table class="pain-tbl">
+          <thead><tr><th>❗ Pain Points</th><th>💡 Cơ hội AI</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-label pain-point">Housekeeping routing</td>
+              <td class="ai-opp">AI sắp xếp thứ tự dọn phòng theo checkout time, guest preference, staff location. Marriott và một số chain lớn dùng cái này để giảm 15–20% cleaning time.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Internal SOP chatbot</td>
+              <td class="ai-opp">Staff hỏi AI thay vì hỏi manager: "Quy trình xử lý late checkout là gì?", "Guest complain về noise thì làm gì?" — giảm đáng kể thời gian training nhân viên mới.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Guest Brief Auto-Generation</td>
+              <td class="ai-opp">Mỗi check-in, AI đọc PMS data (tên khách, số đêm, package, special request, lịch sử lưu trú) và tự tạo brief chuẩn hóa cho Butler/FO. Hiện tại viết tay mỗi ca — <strong>tiết kiệm 30–45 phút/ngày</strong>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HR -->
+    <div class="sub-section">
+      <div class="sub-title">2 — Nhân sự (HR)</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px;">Tuyển dụng · L&amp;D · Admin &nbsp;|&nbsp; HaraWorks · Google Sheets · Email · Zalo</div>
+      <div class="tbl-wrap">
+        <table class="pain-tbl">
+          <thead><tr><th>❗ Pain Points</th><th>💡 Cơ hội AI</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-label pain-point">CV Screening & Ranking</td>
+              <td class="ai-opp">AI đọc CV và rank theo JD, kèm lý do ngắn gọn tại sao phù hợp hoặc không.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Onboarding Buddy</td>
+              <td class="ai-opp">New hire hỏi AI mọi thứ trong tuần đầu: benefit, quy trình xin nghỉ phép, ai phụ trách gì, SOP phòng ban. Giảm tải cho HR và manager đáng kể.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Talent Pool</td>
+              <td class="ai-opp">AI tự động lưu & tag ứng viên, smart matching khi có vị trí mới, re-engagement automation sau 3–6 tháng, seasonal hiring prediction dựa trên lịch sử occupancy.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMMERCIAL -->
+    <div class="sub-section">
+      <div class="sub-title">3 — Commercial</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px;">Sales · CS · Marketing · Strategy &nbsp;|&nbsp; HubSpot CRM · Looker Studio · Google/FB Ads · Lighthouse · Odoo PMS</div>
+      <div class="tbl-wrap">
+        <table class="pain-tbl">
+          <thead><tr><th>❗ Pain Points</th><th>💡 Cơ hội AI</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-label pain-point">Weekly Revenue Report Auto-Gen</td>
+              <td class="ai-opp">AI pull data từ HubSpot + Odoo + Looker, tự tạo báo cáo doanh thu tuần với highlight bất thường. Từ 4–6 giờ xuống <strong>15 phút review</strong>.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Rate Intelligence</td>
+              <td class="ai-opp">AI monitor competitor pricing trên OTA mỗi ngày, gợi ý điều chỉnh giá dựa trên occupancy hiện tại và demand forecast.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Booking Intelligence</td>
+              <td class="ai-opp">AI đọc data từ Odoo PMS + HubSpot và trả lời: "Kênh nào đang convert tốt nhất?", "Corporate client nào chưa book lại sau 60 ngày?", "Villa nào đang underperform so với cùng kỳ?"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="sub-section">
+      <div class="sub-title">4 — Finance</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px;">Kế toán · Purchasing &nbsp;|&nbsp; FAST Accounting · Odoo 14 · Excel</div>
+      <div class="tbl-wrap">
+        <table class="pain-tbl">
+          <thead><tr><th>❗ Pain Points</th><th>💡 Cơ hội AI</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-label pain-point">Automated Revenue Reconciliation</td>
+              <td class="ai-opp">Doanh thu từ nhiều nguồn: Booking.com, Agoda, Airbnb, walk-in, direct booking. AI auto-match booking records với bank transactions, flag discrepancies, generate reconciliation report hàng tuần.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Budget vs Actual Monitoring</td>
+              <td class="ai-opp">AI agent chạy hàng tuần: so sánh actual spend vs budget per department, flag departments đang overspend &gt; X%, tự động gửi summary cho department heads.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Cash Flow Forecasting</td>
+              <td class="ai-opp">Combine booking data + payroll schedule + vendor payment terms → AI predict cash position 30/60/90 ngày tới.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TECH -->
+    <div class="sub-section">
+      <div class="sub-title">5 — Tech</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:10px;">Product · Lead Engineer · Backend · Frontend · DevOps · QA &nbsp;|&nbsp; Odoo 14 · PostgreSQL · Golang · Python · Node.js · React.js · Flutter</div>
+      <div class="tbl-wrap">
+        <table class="pain-tbl">
+          <thead><tr><th>❗ Pain Points</th><th>💡 Cơ hội AI</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-label pain-point">AI-Augmented Development</td>
+              <td class="ai-opp">Toàn bộ engineering team dùng Claude/Copilot như pair programmer: code generation, boilerplate, unit tests, giải thích legacy code, debug stack traces. Với team nhỏ như MVL, đây như có thêm <strong>1–2 developer</strong> mà không cần hire.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Automated Code Review</td>
+              <td class="ai-opp">AI review PR trước khi senior engineer nhìn vào: security issues (SQL injection, exposed secrets), performance anti-patterns (N+1 queries, missing indexes), code style.</td>
+            </tr>
+            <tr>
+              <td class="col-label pain-point">Codebase Q&amp;A — Ask the Repo</td>
+              <td class="ai-opp">Index toàn bộ codebase vào RAG. Engineer mới hỏi: "Payment flow xử lý như thế nào?", "Booking confirmation email trigger ở đâu?" — Onboarding từ 2 tuần xuống <strong>vài ngày</strong>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: ACTION + TIMELINE -->
+  <section id="action">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div>
+        <div class="section-title">Action Items Tuần 1 & Timeline 4 Tuần</div>
+        <div class="section-desc">Kế hoạch triển khai cụ thể — bắt đầu từ tuần này</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">3.1 — Action Items Tuần 1</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:36px">#</th><th>Action Item</th><th>Owner</th><th>Mục tiêu</th><th style="width:80px">Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:700;color:var(--orange)">1</td>
+              <td>Kick-off meeting: trình bày deck này cho CEO & dept heads</td>
+              <td>—</td>
+              <td>Align mục tiêu, định hướng AI roadmap</td>
+              <td><span class="badge badge-todo">To Do</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--orange)">2</td>
+              <td>Chọn pilot department + problem statement</td>
+              <td>—</td>
+              <td>Xác định rõ 1 problem cụ thể để giải quyết trong tháng 1</td>
+              <td><span class="badge badge-todo">To Do</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--orange)">3</td>
+              <td>Setup Claude for Teams account, invite core team</td>
+              <td>—</td>
+              <td>Môi trường AI sẵn sàng, data privacy đảm bảo</td>
+              <td><span class="badge badge-todo">To Do</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--orange)">4</td>
+              <td>Form JARVIS team</td>
+              <td>—</td>
+              <td>Thành lập team AI nội bộ với tên JARVIS</td>
+              <td><span class="badge badge-todo">To Do</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">3.2 — Timeline 4 Tuần</div>
+      <div class="timeline-grid">
+        <div class="week-col">
+          <div class="week-header">Tuần 1</div>
+          <div class="week-items">
+            <div class="week-item">Kick-off & Setup môi trường, tools & form JARVIS team</div>
+            <div class="week-item">Pick a problem for pilot</div>
+          </div>
+        </div>
+        <div class="week-col">
+          <div class="week-header">Tuần 2</div>
+          <div class="week-items">
+            <div class="week-item">Build data pipeline & pre-processing data</div>
+            <div class="week-item">Build Application & inject AI Agent to read data</div>
+          </div>
+        </div>
+        <div class="week-col">
+          <div class="week-header">Tuần 3</div>
+          <div class="week-items">
+            <div class="week-item">Build Application & inject AI Agent (tiếp)</div>
+            <div class="week-item">Test nội bộ với AI Champions (Head & Manager)</div>
+          </div>
+        </div>
+        <div class="week-col">
+          <div class="week-header">Tuần 4</div>
+          <div class="week-items">
+            <div class="week-item">Demo & điều chỉnh</div>
+            <div class="week-item">Báo cáo & Lập kế hoạch tháng 2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">3.3 — Nguyên tắc vận hành</div>
+      <div class="principles">
+        <div class="principle">
+          <div class="principle-num">01</div>
+          <div class="principle-text"><strong>Start small</strong> — 1 pilot, 1 agent, 1 phòng ban. Chứng minh ROI trước khi scale.</div>
+        </div>
+        <div class="principle">
+          <div class="principle-num">02</div>
+          <div class="principle-text"><strong>Data privacy first</strong> — dùng Claude for Teams. Anthropic cam kết không train model bằng data của MVL.</div>
+        </div>
+        <div class="principle">
+          <div class="principle-num">03</div>
+          <div class="principle-text"><strong>AI Champion là cầu nối</strong> — mỗi bộ phận có 1 champion. Giới hạn effort ≤ 10% (2–3h/tuần).</div>
+        </div>
+        <div class="principle">
+          <div class="principle-num">04</div>
+          <div class="principle-text"><strong>Document hết</strong> — mọi quyết định được ghi lại để onboard nhanh khi team mở rộng.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: RESOURCE -->
+  <section id="resource">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div>
+        <div class="section-title">Resource Planning · Timeline · Risk · Hiring</div>
+        <div class="section-desc">Chi phí, rủi ro và kế hoạch tuyển dụng</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">4.1 — Resource Planning — Chi phí ước tính</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Hạng mục</th><th>Loại</th><th>Số tiền</th><th>Tháng</th><th>Ghi chú</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-label">Claude for Teams (5 users)</td>
+              <td>SaaS — USD</td>
+              <td><strong>~$125 / tháng</strong></td>
+              <td>T1 → ...</td>
+              <td>$25/user/tháng — data privacy đảm bảo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">4.2 — Rủi ro & Phụ thuộc</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Rủi ro</th><th style="width:90px">Mức độ</th><th style="width:100px">Xác suất</th><th>Giải pháp</th></tr></thead>
+          <tbody>
+            <tr class="risk-high">
+              <td class="col-label">Budget không được approve đúng tuần 1</td>
+              <td><span class="badge badge-high">Cao</span></td>
+              <td>Trung bình</td>
+              <td>Chuẩn bị ROI case trước khi trình bày deck này</td>
+            </tr>
+            <tr class="risk-high">
+              <td class="col-label">Pilot chọn sai, ROI không rõ</td>
+              <td><span class="badge badge-high">Cao</span></td>
+              <td>Trung bình</td>
+              <td>Dùng danh sách recommend: HR CV / OPS Guest Brief</td>
+            </tr>
+            <tr class="risk-mid">
+              <td class="col-label">AI Champion bận, không thể tham gia</td>
+              <td><span class="badge badge-mid">Trung bình</span></td>
+              <td>Cao</td>
+              <td>Giới hạn effort ≤ 10% — chỉ cần 2–3h/tuần</td>
+            </tr>
+            <tr class="risk-mid">
+              <td class="col-label">Data chưa sẵn sàng</td>
+              <td><span class="badge badge-mid">Trung bình</span></td>
+              <td>Trung bình</td>
+              <td>Centralize for current data and build feature to collect data</td>
+            </tr>
+            <tr class="risk-low">
+              <td class="col-label">Dữ liệu nhạy cảm / data privacy</td>
+              <td><span class="badge badge-low">Thấp</span></td>
+              <td>Thấp</td>
+              <td>Claude for Teams — Anthropic cam kết không dùng data để train model</td>
+            </tr>
+            <tr class="risk-low">
+              <td class="col-label">Tech stack chưa sẵn sàng</td>
+              <td><span class="badge badge-low">Thấp</span></td>
+              <td>Thấp</td>
+              <td>Template đã có, chỉ cần adapt cho AI endpoint</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">4.3 — Kế hoạch Tuyển dụng</div>
+      <p style="font-size:13.5px;color:var(--gray);margin-bottom:16px;">2 vị trí cần tuyển để scale AI roadmap sau tháng 1 — mục tiêu onboard trong Q2/Q3 2026.</p>
+      <div class="hiring-grid">
+        <div class="hiring-card">
+          <div class="hiring-card-header">Data Engineer</div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Mục tiêu</div>
+            <div class="hiring-row-val">Xây dựng và maintain data pipeline — đảm bảo data sạch, đủ, sẵn sàng cho AI & reporting</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Scope</div>
+            <div class="hiring-row-val">ETL/ELT từ Odoo 14, Google Sheets, OTA → data warehouse · Data quality & lineage · Dashboard pipeline · Schema design</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Tech stack</div>
+            <div class="hiring-row-val">PostgreSQL · dbt · Airflow / Prefect · Python · BigQuery / Redshift · Docker · Git</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Seniority</div>
+            <div class="hiring-row-val">Mid-level (2–4 năm) — tự làm được, cần ít mentoring, move fast</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Lương ước tính</div>
+            <div class="hiring-row-val" style="color:#aaa;">TBD</div>
+          </div>
+        </div>
+        <div class="hiring-card">
+          <div class="hiring-card-header">AI Engineer</div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Mục tiêu</div>
+            <div class="hiring-row-val">Xây dựng và vận hành AI features — tích hợp LLM vào quy trình từng phòng ban</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Scope</div>
+            <div class="hiring-row-val">Tích hợp Claude API · Xây dựng RAG pipeline (pgvector) · Prompt engineering & eval · AI agent workflows · Deploy & monitor AI features</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Tech stack</div>
+            <div class="hiring-row-val">Claude API (Anthropic) · Python (FastAPI, LangChain) · pgvector · Docker · Golang · LangSmith / Promptfoo</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Seniority</div>
+            <div class="hiring-row-val">Mid-level (2–4 năm) — đã từng làm với LLM API hoặc RAG system</div>
+          </div>
+          <div class="hiring-row">
+            <div class="hiring-row-label">Lương ước tính</div>
+            <div class="hiring-row-val" style="color:#aaa;">TBD</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>JARVIS</span> — Modern Village Lifestyle &nbsp;·&nbsp; AI Transformation Roadmap &nbsp;·&nbsp; Tháng 4, 2026 &nbsp;·&nbsp; Bảo mật — Nội bộ
+</footer>
+
+<script>
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  });
+</script>
+</body>
+</html>
