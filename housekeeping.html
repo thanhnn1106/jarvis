@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>JARVIS — Housekeeping</title>
+<style>
+  :root {
+    --orange: #FF6B35;
+    --dark: #2C2C3E;
+    --gray: #7A7A9A;
+    --light: #F5F4FF;
+    --border: #E8E6F0;
+    --bg: #FAFAFE;
+    --green: #1E9A58;
+    --green-bg: #E8FAF0;
+    --green-border: #B0E8CA;
+    --blue: #2A7AC0;
+    --blue-bg: #E8F4FE;
+    --red: #D93025;
+    --red-bg: #FEECEC;
+    --yellow: #C07000;
+    --yellow-bg: #FEF6E8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--dark); padding: 16px 16px 0;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 2px 12px rgba(44,44,62,.2);
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .header-title { color: var(--orange); font-weight: 800; font-size: 18px; letter-spacing: .5px; }
+  .header-date { color: #9896b8; font-size: 12px; }
+  .stats-row { display: flex; gap: 8px; padding-bottom: 12px; }
+  .stat-chip {
+    flex: 1; text-align: center; padding: 6px 4px; border-radius: 8px;
+    font-size: 11px; font-weight: 600;
+  }
+  .stat-chip .num { font-size: 18px; font-weight: 800; display: block; line-height: 1.2; }
+  .stat-pending { background: rgba(122,122,154,.15); color: #b0aed0; }
+  .stat-cleaning { background: rgba(255,107,53,.15); color: var(--orange); }
+  .stat-done { background: rgba(30,154,88,.15); color: #4cc98a; }
+  .stat-total { background: rgba(255,255,255,.07); color: #e8e6ff; }
+
+  /* ── FILTERS ── */
+  .filters {
+    background: #fff; border-bottom: 1px solid var(--border);
+    display: flex; overflow-x: auto; padding: 0 12px;
+    position: sticky; top: 109px; z-index: 40;
+  }
+  .filter-btn {
+    padding: 10px 14px; font-size: 13px; font-weight: 600; white-space: nowrap;
+    border: none; background: none; cursor: pointer; color: var(--gray);
+    border-bottom: 2px solid transparent; transition: all .2s;
+  }
+  .filter-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    padding: 10px 16px; display: flex; gap: 8px; align-items: center;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .toolbar-label { font-size: 12px; color: var(--gray); flex-shrink: 0; }
+  .staff-filter-select {
+    flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px;
+    font-size: 13px; color: var(--dark); background: #fff; outline: none;
+  }
+  .btn-add {
+    background: var(--orange); color: #fff; border: none; border-radius: 8px;
+    padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── ROOM LIST ── */
+  .room-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .room-card {
+    background: #fff; border-radius: 12px; border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(44,44,62,.05); overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .room-card.priority-flag { border-left: 4px solid var(--orange); }
+  .room-card.status-cleaning { border-left: 4px solid var(--blue); }
+  .room-card.status-done { border-left: 4px solid var(--green); opacity: .8; }
+
+  .room-card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; cursor: pointer; user-select: none;
+  }
+  .room-num {
+    background: var(--dark); color: #fff; font-weight: 800; font-size: 15px;
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .room-num.cleaning { background: var(--blue); }
+  .room-num.done { background: var(--green); }
+
+  .room-info { flex: 1; min-width: 0; }
+  .room-info-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .room-name { font-weight: 700; font-size: 14px; }
+  .room-floor { font-size: 11px; color: var(--gray); }
+  .room-info-bottom { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge-pending { background: var(--light); color: var(--gray); border: 1px solid var(--border); }
+  .badge-cleaning { background: var(--blue-bg); color: var(--blue); border: 1px solid #B8D8F5; }
+  .badge-done { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-priority { background: var(--red-bg); color: var(--red); border: 1px solid #F5C0BE; }
+  .badge-checkin { background: var(--yellow-bg); color: var(--yellow); border: 1px solid #F5DFA8; }
+
+  .room-timer { font-size: 13px; font-weight: 700; color: var(--blue); margin-left: auto; flex-shrink: 0; }
+  .room-timer.done { color: var(--green); }
+
+  .chevron { color: var(--gray); font-size: 12px; transition: transform .2s; flex-shrink: 0; }
+  .room-card.expanded .chevron { transform: rotate(180deg); }
+
+  /* ── ROOM DETAIL ── */
+  .room-detail { border-top: 1px solid var(--border); padding: 14px; display: none; }
+  .room-card.expanded .room-detail { display: block; }
+
+  .detail-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+  .detail-label { font-size: 12px; color: var(--gray); font-weight: 600; width: 70px; flex-shrink: 0; padding-top: 2px; }
+  .detail-val { flex: 1; }
+
+  .assign-select {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; color: var(--dark); background: #fff; outline: none;
+  }
+  .notes-input {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; color: var(--dark); background: #fff;
+    outline: none; resize: none; min-height: 56px; font-family: inherit;
+  }
+  .notes-input:focus, .assign-select:focus { border-color: var(--orange); }
+
+  .priority-toggle {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+  }
+  .toggle-switch {
+    width: 36px; height: 20px; border-radius: 10px; background: var(--border);
+    position: relative; transition: background .2s; flex-shrink: 0;
+  }
+  .toggle-switch::after {
+    content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; top: 2px; left: 2px; transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle-switch.on { background: var(--orange); }
+  .toggle-switch.on::after { transform: translateX(16px); }
+  .toggle-label { font-size: 13px; color: var(--dark); }
+
+  .action-btns { display: flex; gap: 8px; margin-top: 4px; }
+  .btn {
+    flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer; transition: all .15s; text-align: center;
+  }
+  .btn-start { background: var(--blue-bg); color: var(--blue); border: 1px solid #B8D8F5; }
+  .btn-done  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .btn-reset { background: var(--light); color: var(--gray); border: 1px solid var(--border); }
+  .btn-delete { background: var(--red-bg); color: var(--red); border: 1px solid #F5C0BE; flex: 0; padding: 10px 14px; }
+  .btn:active { opacity: .7; transform: scale(.97); }
+
+  /* ── ADD ROOM MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200;
+    display: none; align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px 32px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-weight: 800; font-size: 16px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 5px; display: block; }
+  .form-input {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 14px; color: var(--dark); outline: none; font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--orange); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-btns { display: flex; gap: 8px; margin-top: 6px; }
+  .btn-primary { background: var(--orange); color: #fff; border: none; }
+  .btn-cancel { background: var(--light); color: var(--gray); border: 1px solid var(--border); flex: 0; padding: 10px 18px; }
+
+  /* ── STAFF MODAL ── */
+  .staff-list-edit { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .staff-item { display: flex; align-items: center; gap: 8px; }
+  .staff-item input { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; outline: none; }
+  .staff-item input:focus { border-color: var(--orange); }
+  .btn-remove-staff { background: var(--red-bg); color: var(--red); border: 1px solid #F5C0BE; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+  .btn-add-staff { background: var(--light); color: var(--dark); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; width: 100%; margin-bottom: 12px; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 48px 24px; color: var(--gray); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; }
+
+  /* ── FAB ── */
+  .fab {
+    position: fixed; bottom: 24px; right: 20px; z-index: 100;
+    background: var(--orange); color: #fff; border: none; border-radius: 50%;
+    width: 54px; height: 54px; font-size: 24px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255,107,53,.4); display: flex; align-items: center; justify-content: center;
+    transition: transform .15s;
+  }
+  .fab:active { transform: scale(.93); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">⚡ Housekeeping</div>
+      <div class="header-date" id="headerDate"></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a href="index.html" style="background:rgba(255,255,255,.1);border:none;color:#b0aed0;border-radius:8px;padding:6px 10px;font-size:12px;text-decoration:none;">← Roadmap</a>
+      <button onclick="openStaffModal()" style="background:rgba(255,255,255,.1);border:none;color:#b0aed0;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">👥 Staff</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-chip stat-pending"><span class="num" id="statPending">0</span>Chờ</div>
+    <div class="stat-chip stat-cleaning"><span class="num" id="statCleaning">0</span>Đang dọn</div>
+    <div class="stat-chip stat-done"><span class="num" id="statDone">0</span>Xong</div>
+    <div class="stat-chip stat-total"><span class="num" id="statTotal">0</span>Tổng</div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all', this)">Tất cả</button>
+  <button class="filter-btn" onclick="setFilter('pending', this)">Chờ dọn</button>
+  <button class="filter-btn" onclick="setFilter('cleaning', this)">Đang dọn</button>
+  <button class="filter-btn" onclick="setFilter('done', this)">Xong</button>
+  <button class="filter-btn" onclick="setFilter('priority', this)">⚡ Ưu tiên</button>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <span class="toolbar-label">Staff:</span>
+  <select class="staff-filter-select" id="staffFilter" onchange="renderRooms()">
+    <option value="">Tất cả</option>
+  </select>
+</div>
+
+<!-- ROOM LIST -->
+<div class="room-list" id="roomList"></div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddModal()" title="Thêm phòng">+</button>
+
+<!-- ADD ROOM MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Thêm phòng</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Số phòng *</label>
+        <input class="form-input" id="f_num" placeholder="101" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tầng</label>
+        <input class="form-input" id="f_floor" placeholder="1" type="text">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Loại phòng</label>
+      <input class="form-input" id="f_type" placeholder="Deluxe / Suite / Villa...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Assign cho</label>
+      <select class="form-input" id="f_assign">
+        <option value="">Chưa assign</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ghi chú / Special request</label>
+      <textarea class="form-input" id="f_notes" rows="2" placeholder="VIP guest, early check-in 12h, extra towels..."></textarea>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <div class="toggle-switch" id="f_priority_toggle" onclick="toggleFormPriority()"></div>
+        <span style="font-size:13px;">⚡ Ưu tiên cao (early check-in / VIP)</span>
+      </label>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="addRoom()">Thêm phòng</button>
+      <button class="btn btn-cancel" onclick="closeAddModal()">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<!-- STAFF MODAL -->
+<div class="modal-overlay" id="staffModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Quản lý Staff</div>
+    <div class="staff-list-edit" id="staffListEdit"></div>
+    <button class="btn-add-staff" onclick="addStaffField()">+ Thêm nhân viên</button>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="saveStaff()">Lưu</button>
+      <button class="btn btn-cancel" onclick="closeStaffModal()">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let staff = ['Lan', 'Hoa', 'Minh', 'Tuấn'];
+let rooms = [
+  { id: 1, num: '101', floor: '1', type: 'Deluxe', assign: 'Lan', notes: 'Early check-in 12h', priority: true,  status: 'pending', startTime: null, elapsed: 0 },
+  { id: 2, num: '102', floor: '1', type: 'Deluxe', assign: 'Lan', notes: '',                   priority: false, status: 'pending', startTime: null, elapsed: 0 },
+  { id: 3, num: '201', floor: '2', type: 'Suite',  assign: 'Hoa', notes: 'VIP — Mr. Tanaka',   priority: true,  status: 'pending', startTime: null, elapsed: 0 },
+  { id: 4, num: '202', floor: '2', type: 'Suite',  assign: 'Hoa', notes: '',                   priority: false, status: 'pending', startTime: null, elapsed: 0 },
+  { id: 5, num: '301', floor: '3', type: 'Villa',  assign: 'Minh', notes: 'Extra towels',      priority: false, status: 'pending', startTime: null, elapsed: 0 },
+  { id: 6, num: '302', floor: '3', type: 'Villa',  assign: 'Tuấn', notes: '',                  priority: false, status: 'pending', startTime: null, elapsed: 0 },
+];
+let nextId = 10;
+let currentFilter = 'all';
+let formPriorityOn = false;
+let timerInterval = null;
+let expandedId = null;
+
+// ── TIMER ──
+function startTimer(id) {
+  const r = rooms.find(x => x.id === id);
+  if (!r || r.status === 'done') return;
+  r.status = 'cleaning';
+  r.startTime = r.startTime || Date.now() - (r.elapsed * 1000);
+  save(); renderRooms();
+}
+function stopTimer(id) {
+  const r = rooms.find(x => x.id === id);
+  if (!r) return;
+  if (r.startTime) r.elapsed = Math.floor((Date.now() - r.startTime) / 1000);
+  r.status = 'done';
+  r.startTime = null;
+  save(); renderRooms();
+}
+function resetRoom(id) {
+  const r = rooms.find(x => x.id === id);
+  if (!r) return;
+  r.status = 'pending'; r.startTime = null; r.elapsed = 0;
+  save(); renderRooms();
+}
+function deleteRoom(id) {
+  if (!confirm('Xoá phòng này?')) return;
+  rooms = rooms.filter(x => x.id !== id);
+  save(); renderRooms();
+}
+function formatTime(r) {
+  let secs = r.elapsed;
+  if (r.startTime) secs = Math.floor((Date.now() - r.startTime) / 1000);
+  if (secs === 0) return '';
+  const m = Math.floor(secs / 60), s = secs % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+// ── RENDER ──
+function getFiltered() {
+  const sf = document.getElementById('staffFilter').value;
+  return rooms.filter(r => {
+    if (sf && r.assign !== sf) return false;
+    if (currentFilter === 'pending')  return r.status === 'pending';
+    if (currentFilter === 'cleaning') return r.status === 'cleaning';
+    if (currentFilter === 'done')     return r.status === 'done';
+    if (currentFilter === 'priority') return r.priority;
+    return true;
+  });
+}
+function renderRooms() {
+  updateStats();
+  const list = document.getElementById('roomList');
+  const filtered = getFiltered();
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🛏️</div><div class="empty-text">Không có phòng nào</div></div>`;
+    return;
+  }
+  // Sort: priority first, then by status (cleaning > pending > done), then by num
+  const order = { cleaning: 0, pending: 1, done: 2 };
+  filtered.sort((a, b) => {
+    if (a.priority !== b.priority) return b.priority - a.priority;
+    if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+    return a.num.localeCompare(b.num, undefined, { numeric: true });
+  });
+
+  list.innerHTML = filtered.map(r => {
+    const t = formatTime(r);
+    const isExpanded = expandedId === r.id;
+    const assignName = r.assign || '<span style="color:var(--gray)">Chưa assign</span>';
+    const staffOptions = staff.map(s => `<option value="${s}" ${r.assign === s ? 'selected' : ''}>${s}</option>`).join('');
+
+    return `
+    <div class="room-card ${r.priority ? 'priority-flag' : ''} status-${r.status} ${isExpanded ? 'expanded' : ''}" id="card-${r.id}">
+      <div class="room-card-header" onclick="toggleExpand(${r.id})">
+        <div class="room-num ${r.status}">${r.status === 'done' ? '✓' : r.num}</div>
+        <div class="room-info">
+          <div class="room-info-top">
+            <span class="room-name">Phòng ${r.num}</span>
+            <span class="room-floor">${r.type}${r.floor ? ' · Tầng '+r.floor : ''}</span>
+          </div>
+          <div class="room-info-bottom">
+            <span class="badge badge-${r.status}">${r.status === 'pending' ? '⏳ Chờ' : r.status === 'cleaning' ? '🧹 Đang dọn' : '✅ Xong'}</span>
+            ${r.priority ? '<span class="badge badge-priority">⚡ Ưu tiên</span>' : ''}
+            ${r.assign ? `<span style="font-size:11px;color:var(--gray)">👤 ${r.assign}</span>` : ''}
+          </div>
+        </div>
+        ${t ? `<div class="room-timer ${r.status === 'done' ? 'done' : ''}">⏱ ${t}</div>` : ''}
+        <div class="chevron">▼</div>
+      </div>
+      <div class="room-detail">
+        <div class="detail-row">
+          <div class="detail-label">Assign</div>
+          <div class="detail-val">
+            <select class="assign-select" onchange="updateAssign(${r.id}, this.value)">
+              <option value="">Chưa assign</option>
+              ${staffOptions}
+            </select>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Ghi chú</div>
+          <div class="detail-val">
+            <textarea class="notes-input" onchange="updateNotes(${r.id}, this.value)" placeholder="Special request, ghi chú...">${r.notes}</textarea>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Ưu tiên</div>
+          <div class="detail-val">
+            <label class="priority-toggle" onclick="togglePriority(${r.id})">
+              <div class="toggle-switch ${r.priority ? 'on' : ''}"></div>
+              <span class="toggle-label">${r.priority ? '⚡ Ưu tiên cao' : 'Bình thường'}</span>
+            </label>
+          </div>
+        </div>
+        <div class="action-btns">
+          ${r.status === 'pending'  ? `<button class="btn btn-start" onclick="startTimer(${r.id})">▶ Bắt đầu</button>` : ''}
+          ${r.status === 'cleaning' ? `<button class="btn btn-done"  onclick="stopTimer(${r.id})">✓ Hoàn thành</button>` : ''}
+          ${r.status !== 'pending'  ? `<button class="btn btn-reset" onclick="resetRoom(${r.id})">↺ Reset</button>` : ''}
+          <button class="btn btn-delete" onclick="deleteRoom(${r.id})">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const p = rooms.filter(r => r.status === 'pending').length;
+  const c = rooms.filter(r => r.status === 'cleaning').length;
+  const d = rooms.filter(r => r.status === 'done').length;
+  document.getElementById('statPending').textContent  = p;
+  document.getElementById('statCleaning').textContent = c;
+  document.getElementById('statDone').textContent     = d;
+  document.getElementById('statTotal').textContent    = rooms.length;
+}
+
+function toggleExpand(id) {
+  expandedId = expandedId === id ? null : id;
+  renderRooms();
+}
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderRooms();
+}
+function updateAssign(id, val) {
+  rooms.find(r => r.id === id).assign = val; save();
+}
+function updateNotes(id, val) {
+  rooms.find(r => r.id === id).notes = val; save();
+}
+function togglePriority(id) {
+  const r = rooms.find(x => x.id === id);
+  r.priority = !r.priority; save(); renderRooms();
+}
+
+// ── ADD ROOM ──
+function openAddModal() {
+  populateAssignSelect('f_assign');
+  formPriorityOn = false;
+  document.getElementById('f_priority_toggle').className = 'toggle-switch';
+  document.getElementById('f_num').value = '';
+  document.getElementById('f_floor').value = '';
+  document.getElementById('f_type').value = '';
+  document.getElementById('f_notes').value = '';
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+function toggleFormPriority() {
+  formPriorityOn = !formPriorityOn;
+  document.getElementById('f_priority_toggle').className = 'toggle-switch' + (formPriorityOn ? ' on' : '');
+}
+function addRoom() {
+  const num = document.getElementById('f_num').value.trim();
+  if (!num) { alert('Vui lòng nhập số phòng'); return; }
+  rooms.push({
+    id: nextId++,
+    num,
+    floor: document.getElementById('f_floor').value.trim(),
+    type: document.getElementById('f_type').value.trim() || 'Phòng',
+    assign: document.getElementById('f_assign').value,
+    notes: document.getElementById('f_notes').value.trim(),
+    priority: formPriorityOn,
+    status: 'pending', startTime: null, elapsed: 0
+  });
+  save(); closeAddModal(); renderRooms();
+}
+
+// ── STAFF ──
+function openStaffModal() {
+  renderStaffEdit();
+  document.getElementById('staffModal').classList.add('open');
+}
+function closeStaffModal() { document.getElementById('staffModal').classList.remove('open'); }
+function renderStaffEdit() {
+  document.getElementById('staffListEdit').innerHTML = staff.map((s, i) => `
+    <div class="staff-item">
+      <input value="${s}" id="si_${i}" placeholder="Tên nhân viên">
+      <button class="btn-remove-staff" onclick="removeStaffField(${i})">✕</button>
+    </div>`).join('');
+}
+function addStaffField() {
+  staff.push('');
+  renderStaffEdit();
+  document.getElementById(`si_${staff.length - 1}`).focus();
+}
+function removeStaffField(i) { staff.splice(i, 1); renderStaffEdit(); }
+function saveStaff() {
+  staff = Array.from(document.querySelectorAll('[id^="si_"]'))
+    .map(el => el.value.trim()).filter(Boolean);
+  save(); updateStaffDropdowns(); closeStaffModal();
+}
+function updateStaffDropdowns() {
+  const sf = document.getElementById('staffFilter');
+  const cur = sf.value;
+  sf.innerHTML = '<option value="">Tất cả</option>' + staff.map(s => `<option value="${s}" ${cur===s?'selected':''}>${s}</option>`).join('');
+  renderRooms();
+}
+function populateAssignSelect(id) {
+  const el = document.getElementById(id);
+  el.innerHTML = '<option value="">Chưa assign</option>' + staff.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+// ── PERSIST ──
+function save() {
+  localStorage.setItem('hk_rooms', JSON.stringify(rooms));
+  localStorage.setItem('hk_staff', JSON.stringify(staff));
+  localStorage.setItem('hk_nextId', nextId);
+}
+function load() {
+  try {
+    const r = localStorage.getItem('hk_rooms');
+    const s = localStorage.getItem('hk_staff');
+    const n = localStorage.getItem('hk_nextId');
+    if (r) rooms = JSON.parse(r);
+    if (s) staff = JSON.parse(s);
+    if (n) nextId = parseInt(n);
+    // Restore active timers
+    rooms.forEach(r => { if (r.status === 'cleaning' && !r.startTime) r.startTime = Date.now() - r.elapsed * 1000; });
+  } catch(e) {}
+}
+
+// ── DATE ──
+function updateDate() {
+  const d = new Date();
+  document.getElementById('headerDate').textContent =
+    d.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' });
+}
+
+// ── TICK (for active timers) ──
+function tick() {
+  const hasCleaning = rooms.some(r => r.status === 'cleaning' && r.startTime);
+  if (hasCleaning) renderRooms();
+}
+
+// ── INIT ──
+load();
+updateDate();
+updateStaffDropdowns();
+renderRooms();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
